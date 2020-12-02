@@ -25,20 +25,22 @@ Of course, your expense report is much larger. Find the two entries that sum to 
 
 def get_list_from_file(filename):
     with open(filename, "r") as file:
-        return file.read().splitlines();
+        return file.read().splitlines()
+
 
 def solve_part_one():
-    input = [int(i) for i in get_list_from_file("aoc_2020_01A_input")];
-    input.sort(reverse=True);
+    input = [int(i) for i in get_list_from_file("aoc_2020_01A_input")]
+    input.sort(reverse=True)
 
     for i in input:
-        target = 2020 - i;
+        target = 2020 - i
         if target in input:
-            break;
+            break
 
-    print(i);
-    print(target);
-    print(i * target);
+    print(i)
+    print(target)
+    print(i * target)
+
 
 """--- Part Two ---
 The Elves in accounting are thankful for your help; one of them even offers you a starfish coin they had left over from a past vacation. They offer you a second one if you can find three numbers in your expense report that meet the same criteria.
@@ -48,26 +50,26 @@ Using the above example again, the three entries that sum to 2020 are 979, 366, 
 In your expense report, what is the product of the three entries that sum to 2020?"""
 
 def solve_part_two():
-    input = [int(i) for i in get_list_from_file("aoc_2020_01A_input")];
-    input.sort();
+    input = [int(i) for i in get_list_from_file("aoc_2020_01A_input")]
+    input.sort()
 
     for index, i in enumerate(input):
-        a = i;
-        remainder = 2020 - a;
+        a = i
+        remainder = 2020 - a
 
         for jndex, j in enumerate(input[(index+1):]):
-            b = j;
-            remainder = remainder - b;
+            b = j
+            remainder = remainder - b
 
             if remainder < 0:
-                break;
+                break
             if remainder in input[(jndex+1):]:
-                c = remainder;
-                print(a);
-                print(b);
-                print(c);
-                print(a*b*c);
-                return;
+                c = remainder
+                print(a)
+                print(b)
+                print(c)
+                print(a*b*c)
+                return
 
 
-solve_part_two();
+solve_part_two()
