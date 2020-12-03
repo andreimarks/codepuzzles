@@ -23,7 +23,7 @@ How many passwords are valid according to their policies?"""
 
 import re
 
-def is_password_valid(password_item):
+def is_password_valid_one(password_item):
     # e.g. "2-5 l: fllxf"
     min = int(re.search(r"(\d+)\-", password_item).group(1))
     max = int(re.search(r"\-(\d+)", password_item).group(1))
@@ -45,7 +45,17 @@ Given the same example list from above:
 1-3 b: cdefg is invalid: neither position 1 nor position 3 contains b.
 2-9 c: ccccccccc is invalid: both position 2 and position 9 contain c.
 How many passwords are valid according to the new interpretation of the policies?"""
+
+def is_password_valid_two(password_item):
+    # e.g. "2-5 l: fllxf"
+    first = int(re.search(r"(\d+)\-", password_item).group(1))
+    second = int(re.search(r"\-(\d+)", password_item).group(1))
+    target = re.search(r"(\w)\:", password_item).group(1)
+    password = re.search(r"\b(\w+)\Z", password_item).group(1)
+
+    return (password[first-1] == target) != (password[second-1] == target)
+
 input = get_list_from_file("aoc_2020_02_input")
 
-valid_passwords = [i for i in input if is_password_valid(i)]
+valid_passwords = [i for i in input if is_password_valid_two(i)]
 print(len(valid_passwords))
