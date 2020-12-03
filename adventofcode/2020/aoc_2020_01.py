@@ -49,10 +49,7 @@ Using the above example again, the three entries that sum to 2020 are 979, 366, 
 
 In your expense report, what is the product of the three entries that sum to 2020?"""
 
-def solve_part_two():
-    input = [int(i) for i in get_list_from_file("aoc_2020_01A_input")]
-    input.sort()
-
+def solve_part_two(input):
     for index, i in enumerate(input):
         a = i
         remainder = 2020 - a
@@ -72,4 +69,38 @@ def solve_part_two():
                 return
 
 
-solve_part_two()
+input = [int(i) for i in get_list_from_file("aoc_2020_01A_input")];
+input.sort();
+solve_part_two(input);
+
+""" Random stab at making it extensible, unfinished.
+def solve_part_two_clean(input, total, valueCount):
+    values = [None] * valueCount;
+    level = 0;
+    remainder = total;
+    slice_index = 0;
+    solve_part_two_recursive(input, level, remainder, slice_index, values);
+
+def solve_part_two_recursive(input, level, remainder, slice_index, values):
+    print("Starting loop.")
+
+    if level >= len(values):
+        print("Exit for level.")
+        return;
+
+    for index, i in enumerate(input[slice_index:]):
+        print("Evaluating level " + str(level));
+        values[level] = i;
+        remainder = remainder - values[level];
+
+        if remainder < 0:
+            return;
+        
+        if remainder == 0:
+            print(values);
+            return;
+
+        slice_index = index + 1;
+        solve_part_two_recursive(input, level, remainder, slice_index, values);
+
+solve_part_two_clean(input, 2020, 3);"""
