@@ -55,18 +55,54 @@ from helpers import get_list_from_file
 def check_map_has_tree(map, row, column):
     return map[row][column % len(map[row])] == "#"
 
-def solve_part_one(map, down, right):
+def get_trees_for_slope(map, down, right):
     trees = 0
     column = 0
+    row_to_check = 0
 
     for row, map_row in enumerate(map):
+        if row != row_to_check:
+            continue
+
         if check_map_has_tree(map, row, column):
             trees += 1
 
         column += right
+        row_to_check += down
 
     return trees;
 
-map = get_list_from_file("aoc_2020_03_input")
-trees = solve_part_one(map, 1, 3)
-print(trees)
+def solve_part_one_final():
+    map = get_list_from_file("aoc_2020_03_input")
+    trees = get_trees_for_slope(map, 1, 3)
+    print(trees)
+
+"""--- Part Two ---
+Time to check the rest of the slopes - you need to minimize the probability of a sudden arboreal stop, after all.
+
+Determine the number of trees you would encounter if, for each of the following slopes, you start at the top-left corner and traverse the map all the way to the bottom:
+
+Right 1, down 1.
+Right 3, down 1. (This is the slope you already checked.)
+Right 5, down 1.
+Right 7, down 1.
+Right 1, down 2.
+In the above example, these slopes would find 2, 7, 3, 4, and 2 tree(s) respectively; multiplied together, these produce the answer 336.
+
+What do you get if you multiply together the number of trees encountered on each of the listed slopes?"""
+
+def solve_part_two():
+    slopes = [(1, 1), 
+            (1, 3),
+            (1, 5),
+            (1, 7),
+            (2, 1)]
+
+    map = get_list_from_file("aoc_2020_03_input")
+    tree_counts = [get_trees_for_slope(map, row, column) for (row, column) in slopes]
+
+    product = 1
+    for tree_count in tree_counts:
+        product *= tree_count 
+
+    print(product)
