@@ -57,9 +57,32 @@ def get_seat_id(seat):
     return assignments[0] * 8 + assignments[1]
 
 
+def get_seat_ids(input):
+    return [get_seat_id(seat) for seat in input]
+
+
 def solve_part_one(input):
-    solution = max([get_seat_id(seat) for seat in input])
-    print(solution)
+    print(max(get_seat_ids(input)))
+
+"""--- Part Two ---
+Ding! The "fasten seat belt" signs have turned on. Time to find your seat.
+
+It's a completely full flight, so your seat should be the only missing boarding pass in your list. However, there's a catch: some of the seats at the very front and back of the plane don't exist on this aircraft, so they'll be missing from your list as well.
+
+Your seat wasn't at the very front or back, though; the seats with IDs +1 and -1 from yours will be in your list.
+
+What is the ID of your seat?"""
+
+def solve_part_two(input):
+    sorted_seats = sorted(get_seat_ids(input))
+    for index, seat in enumerate(sorted_seats):
+        if seat + 1 == sorted_seats[index + 1]:
+            continue;
+        my_seat = seat + 1
+        break;
+
+    print(my_seat)
 
 input = get_list_from_file("aoc_2020_05_input")
-solve_part_one(input)
+solve_part_two(input)
+
