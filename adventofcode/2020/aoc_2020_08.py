@@ -45,11 +45,19 @@ Run your copy of the boot code. Immediately before any instruction is executed a
 
 To begin, get your puzzle input."""
 
-def evaluate(commands, index, accumulator):
-    if commands[index] is None:
+def evaluate(commands, index, accumulator, alt_solve_condition=None):
+    if alt_solve_condition is not None and alt_solve_condition(commands, index):
+        # The second part is looking for this solve condition.
         print(accumulator)
         return
-
+    
+    if commands[index] is None:
+        if alt_solve_condition is not None:
+            # The second part doesn't care about this, just wants to exit.
+            return
+        print(accumulator)
+        return
+    
     operation, val = get_operation_and_value(commands[index])
     commands[index] = None
     
@@ -61,8 +69,7 @@ def evaluate(commands, index, accumulator):
     else:
         index += 1
 
-    #print(str(index) + " " + str(accumulator))
-    evaluate(commands, index, accumulator)
+    evaluate(commands, index, accumulator, alt_solve_condition)
 
 def get_operation_and_value(command):
     match = re.match("(.*) (.)(.*)", command)
@@ -73,10 +80,63 @@ def get_operation_and_value(command):
     return operation, value
 
 def solve_part_one(commands):
-    accumulator = 0
-    index = 0
-
+    accumulator, index = 0, 0
     evaluate(commands, index, accumulator)
+
+
+"""--- Part Two ---
+After some careful analysis, you believe that exactly one instruction is corrupted.
+
+Somewhere in the program, either a jmp is supposed to be a nop, or a nop is supposed to be a jmp. (No acc instructions were harmed in the corruption of this boot code.)
+
+The program is supposed to terminate by attempting to execute an instruction immediately after the last instruction in the file. By changing exactly one jmp or nop, you can repair the boot code and make it terminate correctly.
+
+For example, consider the same program from above:
+
+nop +0
+acc +1
+jmp +4
+acc +3
+jmp -3
+acc -99
+acc +1
+jmp -4
+acc +6
+If you change the first instruction from nop +0 to jmp +0, it would create a single-instruction infinite loop, never leaving that instruction. If you change almost any of the jmp instructions, the program will still eventually find another jmp instruction and loop forever.
+
+However, if you change the second-to-last instruction (from jmp -4 to nop -4), the program terminates! The instructions are visited in this order:
+
+nop +0  | 1
+acc +1  | 2
+jmp +4  | 3
+acc +3  |
+jmp -3  |
+acc -99 |
+acc +1  | 4
+nop -4  | 5
+acc +6  | 6
+After the last instruction (acc +6), the program terminates by attempting to run the instruction below the last instruction in the file. With this change, after the program terminates, the accumulator contains the value 8 (acc +1, acc +1, acc +6).
+
+Fix the program so that it terminates normally by changing exactly one jmp (to nop) or nop (to jmp). What is the value of the accumulator after the program terminates?"""
+
+def try_convert_command(command):
+    if "acc" in command or "nop +0" in command:
+        return None
+    
+    return command.replace("jmp", "nop") if "jmp" in command else command.replace("nop", "jmp")
+
+def solve_part_two(commands):
+    for index, command in enumerate(commands):
+        converted_command = try_convert_command(command)
+        if converted_command is None:
+            continue
+
+        converted_list = list(commands)
+        converted_list[index] = converted_command
+
+        accumulator, index = 0, 0
+        evaluate(converted_list, index, accumulator, lambda com, index: index > (len(com) - 1))
+
 
 test_commands = """nop +0
 acc +1
@@ -89,4 +149,5 @@ jmp -4
 acc +6""".split("\n")
 
 commands = get_list_from_file("aoc_2020_08_input")
-
+solve_part_one(list(commands))
+solve_part_two(list(commands))
