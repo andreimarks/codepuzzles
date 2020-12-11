@@ -144,16 +144,29 @@ You glance back down at your bag and try to remember why you brought so many ada
 
 What is the total number of distinct ways you can arrange the adapters to connect the charging outlet to your device?"""
 
-def get_all_arrangements(input, arrangements, index):
+def get_all_arrangements(input, arrangements, index, test_list):
     if index == len(input) - 1:
+        print(input)
+        print(test_list)
         arrangements.append("Done")
         return
-    
+
     number = input[index]
+
+    if (index == 0):
+        test_list = []
+
+    test_list.append(number)
+
     for next_index, value in enumerate(input[index+1:]):
         if value - number > 3:
             break
-        get_all_arrangements(input, arrangements, index + next_index + 1)
+        list_to_use = test_list
+
+        if next_index >= 1:
+            list_to_use = list(test_list)
+
+        get_all_arrangements(input, arrangements, index + next_index + 1, list_to_use)
     
 
 test_input_short = """16
@@ -208,5 +221,5 @@ input_to_use.append(input_to_use[-1]+3)
 
 arrangements = []
 start_index = 0
-get_all_arrangements(input_to_use, arrangements, start_index)
+get_all_arrangements(input_to_use, arrangements, start_index, None)
 print(len(arrangements))
