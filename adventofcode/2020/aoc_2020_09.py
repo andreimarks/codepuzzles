@@ -46,18 +46,18 @@ In this example, after the 5-number preamble, almost every number is the sum of 
 
 The first step of attacking the weakness in the XMAS data is to find the first number in the list (after the preamble) which is not the sum of two of the 25 numbers before it. What is the first number that does not have this property?"""
 
-def validate_number(input, preamble, index):
+def validate_numbers(input, preamble, index):
     if (index >= len(input)):
         return
 
     number = input[index]
     leading_numbers = list(input)[index - preamble:index]
     if not validate_pairs(number, leading_numbers):
-        print(str(number) + "------------------------------")
+        #print(str(number) + "------------------------------")
         return number
 
     index += 1
-    validate_number(input, preamble, index)
+    return validate_numbers(input, preamble, index)
 
 def validate_pairs(number, leading_numbers):
     leading_numbers = sorted(leading_numbers)
@@ -85,6 +85,59 @@ def validate_pair(number, leading_numbers, low, high):
     
     return validate_pair(number, leading_numbers, low, high)
     
+def solve_part_one(input):
+    preamble = start_index = 25
+    print(validate_numbers([int(item) for item in input], preamble, start_index))
+
+"""--- Part Two ---
+The final step in breaking the XMAS encryption relies on the invalid number you just found: you must find a contiguous set of at least two numbers in your list which sum to the invalid number from step 1.
+
+Again consider the above example:
+
+35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576
+In this list, adding up all of the numbers from 15 through 40 produces the invalid number from step 1, 127. (Of course, the contiguous set of numbers in your actual list might be much longer.)
+
+To find the encryption weakness, add together the smallest and largest number in this contiguous range; in this example, these are 15 and 47, producing 62.
+
+What is the encryption weakness in your XMAS-encrypted list of numbers?"""
+
+def get_contiguous_addends(input, target):
+    sum = 0
+    for i, val in enumerate(input):
+        sum += val
+        if sum > target:
+            return get_contiguous_addends(input[1:], target)
+        if sum == target:
+            return input[0:i+1]
+    
+    return None
+
+def solve_part_two(input):
+    preamble = start_index = 25
+    input_to_use = [int(item) for item in input]
+    invalid_number = validate_numbers(input_to_use, preamble, start_index)
+    addends = sorted(get_contiguous_addends(input_to_use, invalid_number))
+    print(addends[0] + addends[-1])
+
 
 test_input = """35
 20
@@ -109,6 +162,5 @@ test_input = """35
 
 input = get_list_from_file("aoc_2020_09_input")
 
-preamble = start_index = 25
-print(validate_number([int(item) for item in input], preamble, start_index))
-
+solve_part_one(input)
+solve_part_two(input)
