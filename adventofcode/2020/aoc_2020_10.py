@@ -144,29 +144,24 @@ You glance back down at your bag and try to remember why you brought so many ada
 
 What is the total number of distinct ways you can arrange the adapters to connect the charging outlet to your device?"""
 
-def get_all_arrangements(input, arrangements, index, test_list):
-    if index == len(input) - 1:
-        print(input)
-        print(test_list)
-        arrangements.append("Done")
-        return
+total = 0
+def get_all_arrangements(index):
+    global input_to_use
+    global total
 
-    number = input[index]
+    length = len(input_to_use)
+    #if index >= length - 1:
+    #    total += 1
+    #    return
 
-    if (index == 0):
-        test_list = []
 
-    test_list.append(number)
+    next_index = index
 
-    for next_index, value in enumerate(input[index+1:]):
-        if value - number > 3:
-            break
-        list_to_use = test_list
+    while next_index < length and (input_to_use[next_index] - input_to_use[index]) <= 3:
+        next_index += 1
+        get_all_arrangements(next_index)
 
-        if next_index >= 1:
-            list_to_use = list(test_list)
-
-        get_all_arrangements(input, arrangements, index + next_index + 1, list_to_use)
+    total += 1
     
 
 test_input_short = """16
@@ -214,12 +209,14 @@ test_input_long = """28
 3""".split("\n")
 
 input = get_list_from_file("aoc_2020_10_input")
-input_to_use = sorted(list(map(int, test_input_long)))
+input_to_use = sorted(list(map(int, test_input_short)))
+input_to_use.insert(0, 0)
 input_to_use.append(input_to_use[-1]+3)
+print(input_to_use)
 
 #solve_part_one(input_to_use)
 
 arrangements = []
 start_index = 0
-get_all_arrangements(input_to_use, arrangements, start_index, None)
-print(len(arrangements))
+get_all_arrangements(start_index)
+print(total)#len(arrangements))
