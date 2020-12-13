@@ -84,30 +84,53 @@ Find a chain that uses all of your adapters to connect the charging outlet to yo
 def solve_part_one(input):
     differences = { 1:0, 2:0, 3:0 }
     previous = 0 # Start with outlet value.
-    for i in input_to_use:
+    for i in input:
         differences[i-previous] += 1
         previous = i
 
     differences[3] += 1 # Add in device difference.
 
+    print(differences)
     print(differences[1] * differences[3])
 
 """ --- Part Two ---
 To completely determine whether you have enough adapters, you'll need to figure out how many different ways they can be arranged. Every arrangement needs to connect the charging outlet to your device. The previous rules about when adapters can successfully connect still apply.
 
 The first example above (the one that starts with 16, 10, 15) supports the following arrangements:
-
-(0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 5, 6, 7, 10, 12, 15, 16, 19, (22)
-(0), 1, 4, 5, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 5, 7, 10, 12, 15, 16, 19, (22)
-(0), 1, 4, 6, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 6, 7, 10, 12, 15, 16, 19, (22)
-(0), 1, 4, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 7, 10, 12, 15, 16, 19, (22)
+5, 6
+(0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22) missing 0
+(0), 1, 4, 5, 6, 7, 10, 12, 15, 16, 19, (22) missing 11 -- 1
+(0), 1, 4, 5, 7, 10, 11, 12, 15, 16, 19, (22)missing 6 -- 1
+(0), 1, 4, 5, 7, 10, 12, 15, 16, 19, (22) missing 6, 11 -- 2
+(0), 1, 4, 6, 7, 10, 11, 12, 15, 16, 19, (22) missing 5 -- 1
+(0), 1, 4, 6, 7, 10, 12, 15, 16, 19, (22) missing 5, 11 -- 2
+(0), 1, 4, 7, 10, 11, 12, 15, 16, 19, (22) missing 5, 6 -- 2
+(0), 1, 4, 7, 10, 12, 15, 16, 19, (22) -- missing 5, 6, 11 -- 3
 (The charging outlet and your device's built-in adapter are shown in parentheses.) Given the adapters from the first example, the total number of arrangements that connect the charging outlet to your device is 8.
+1 + 2 + 3
+5, 6, 11
+56
+5
+6
+-
+
+2 * 2 * 2
+(2 * 2 ) * 2
+
+1 + 2 + 3 + 4 + 5 + 6
+6
 
 The second example above (the one that starts with 28, 33, 18) has many arrangements. Here are a few:
+[0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31, 32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, 52]
+[-, 1, 2, 3, - - 8, 9, 10, - - - 18, 19, - -  24, - - - 32, 33, 34, - - - - -, 46, 47, 48, - -]
+123, 12, 13, 23, 1, 2, 3
+1234, 123, 124, 134, 123, 13, 24, 14, 23
+
+Group of 1 = 2 options
+Group of 2 = 4 options
+Group of 3 = 7 options
+Group of 4 = 9 options
+
 
 (0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
 32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, (52)
@@ -153,7 +176,6 @@ def get_all_arrangements(index):
     #if index >= length - 1:
     #    total += 1
     #    return
-
 
     next_index = index
 
@@ -209,14 +231,68 @@ test_input_long = """28
 3""".split("\n")
 
 input = get_list_from_file("aoc_2020_10_input")
-input_to_use = sorted(list(map(int, test_input_short)))
+
+"""
+input_to_use = sorted(list(map(int, test_input_long)))
+solve_part_one(input_to_use)
+
+input_to_use = sorted(list(map(int, test_input_long)))
 input_to_use.insert(0, 0)
 input_to_use.append(input_to_use[-1]+3)
 print(input_to_use)
 
-#solve_part_one(input_to_use)
-
 arrangements = []
 start_index = 0
 get_all_arrangements(start_index)
-print(total)#len(arrangements))
+print(total)#len(arrangements)) """
+
+"""
+The second example above (the one that starts with 28, 33, 18) has many arrangements. Here are a few:
+[0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31, 32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, 52]
+[-, 1, 2, 3, - - 8, 9, 10, - - - 18, 19, - -  24, - - - 32, 33, 34, - - - - -, 46, 47, 48, - -]
+123, 12, 13, 23, 1, 2, 3
+1234, 123, 124, 134, 123, 13, 24, 14, 23
+
+Group of 1 = 2 options 1
+Group of 2 = 4 options 2
+Group of 3 = 7 options 4
+Group of 4 = 9 options 5
+
+"""
+
+input_to_use = sorted(list(map(int, input)))
+input_to_use.insert(0, 0)
+input_to_use.append(input_to_use[-1]+3)
+print(input_to_use)
+print(len(input_to_use))
+
+expendables = []
+for i, val in enumerate(input_to_use):
+    if i == 0 or i == len(input_to_use) - 1:
+        continue
+    previous = i > 0 and val - input_to_use[i-1] == 3
+    next = i < len(input_to_use) - 1 and input_to_use[i+1] - val == 3
+    if not (previous or next):
+        expendables.append(val)
+print(expendables)
+print(len(expendables))
+
+expendable_groups = []
+expendable_group = []
+
+for i, val in enumerate(expendables):
+    expendable_group.append(val)
+    if i < len(expendables)-1 and expendables[i+1] - val > 1:
+        expendable_groups.append(expendable_group)
+        expendable_group = []
+expendable_groups.append(expendable_group)
+print(expendable_groups)
+
+options = {1:2, 2:4, 3:7, 4:9}
+product = 1
+
+for group in expendable_groups:
+    product *= options[len(group)]
+print(product)
+
+#hahahahahhaha yaaaas 129586085429248
