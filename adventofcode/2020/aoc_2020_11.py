@@ -84,6 +84,62 @@ At this point, something interesting happens: the chaos stabilizes and further a
 
 Simulate your seating area by applying the seating rules repeatedly until no seats change state. How many seats end up occupied?"""
 
+def pad_input(input):
+    input = ["*" + line + "*" for line in input]
+    buffer = "*" * len(input[0])
+    input.insert(0, buffer)
+    input.append(buffer)
+
+    return input
+
+run = 0
+def run_turn(input, output, indices, width):
+    global run
+    run += 1
+
+    for index in indices:
+        # if seat is empty and no occupied seats, occupy
+        if input[index] == "L" and count_occupied_neighbors(input, index, width) == 0:
+            output[index] = "#"
+        # if seat is occupied and four or more seats adjacent to it are also occupied, become empty
+        elif input[index] == "#" and count_occupied_neighbors(input, index, width) >= 4:
+            output[index] = "L"
+        else:
+            output[index] = input[index]
+
+    if (output == input):
+        draw_map(output, width)
+        print(str(run))
+        print(len([i for i in output if i == "#"]))
+    else:
+        run_turn(output, input, indices, width)
+
+
+def count_occupied_neighbors(test, index, width):
+    indices = [index - width - 1, 
+               index - width, 
+               index - width + 1,
+               index - 1,
+               index + 1,
+               index + width - 1,
+               index + width,
+               index + width + 1]
+    return len([i for i in indices if test[i] == "#"])
+
+def draw_map(input, width):
+    input_string = "".join(input)
+    lines = [input_string[i:i+width] for i in range(0, len(input_string), width)]
+    print("\n".join(lines))
+
+def solve_part_one(input):
+    input = pad_input(input) # Add extra buffer
+    width = len(input)
+    input = list("".join(input)) # Create list
+    output = list(input)
+    indices = [index for index, val in enumerate(input) if val != "*"] # Get indices we want to evaluate
+
+    run_turn(input, output, indices, width)
+
 test_input = """L.LL.LL.LL
 LLLLLLL.LL
 L.L.L..L..
@@ -93,12 +149,7 @@ L.LLLLL.LL
 ..L.L.....
 LLLLLLLLLL
 L.LLLLLL.L
-L.LLLLL.LL"""#.split("\n")
+L.LLLLL.LL""".split("\n")
 
-input = test_input
-input = input.split("\n")
-width = len(input[0])
-print(width)
-input = "".join(input)
-print(input)
-
+input = get_list_from_file("aoc_2020_11_input")
+solve_part_one(input)
