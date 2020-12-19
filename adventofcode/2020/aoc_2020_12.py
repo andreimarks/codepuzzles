@@ -1,4 +1,5 @@
 from helpers import get_list_from_file
+import math
 
 """--- Day 12: Rain Risk ---
 Your ferry made decent progress toward the island, but the storm came in faster than anyone expected. The ferry needs to take evasive actions!
@@ -46,7 +47,7 @@ class Ship:
 
 
     def move(self, line):
-        command, value = parse_line(line)
+        command, value = self.parse_line(line)
 
         if command == "R":
             self.direction += value
@@ -67,7 +68,33 @@ class Ship:
     def parse_line(self, line):
         return line[0], int(line[1:])
 
-    def process_line(self, line):)
+    def process_line(self, line):
+        command, value = self.parse_line(line)
+        if command == "F":
+            self.move_toward_waypoint(value)
+        elif command == "R":
+            self.wp_x, self.wp_y = self.rotate_waypoint_around_origin(value)
+        elif command == "L":
+            self.wp_x, self.wp_y = self.rotate_waypoint_around_origin(-value)
+        elif command == "N":
+            self.wp_y += value
+        elif command == "S":
+            self.wp_y -= value
+        elif command == "E":
+            self.wp_x += value
+        elif command == "W":
+            self.wp_x -= value
+
+    def rotate_waypoint_around_origin(self, degrees):
+        theta = math.radians(degrees)
+        # going clockwise...TODO relearn trigonometry and rotation...
+        x_prime = self.wp_x * math.cos(theta) + self.wp_y * math.sin(theta)
+        y_prime = -self.wp_x * math.sin(theta) + self.wp_y * math.cos(theta)
+        return round(x_prime), round(y_prime)
+
+    def move_toward_waypoint(self, value):
+        self.x += value * self.wp_x
+        self.y += value * self.wp_y
 
     def get_direction_from_degrees(self, value):
         index = round(value / (360. / len(Ship.dirs)))
@@ -75,10 +102,14 @@ class Ship:
 
     def get_position(self):
         return (self.x, self.y)
+
+    def get_waypoint_position(self):
+        return (self.wp_x, self.wp_y)
     
     def get_manhattan_distance(self):
         return abs(self.x) + abs(self.y)
         
+
 """--- Part Two ---
 Before you can give the destination to the captain, you realize that the actual action meanings were printed on the back of the instructions the whole time.
 
@@ -112,11 +143,11 @@ F11""".split("\n")
 
 input = get_list_from_file("aoc_2020_12_input")
 
-input_to_use = input
+input_to_use = input#test_input
 
 ship = Ship()
 for line in input_to_use:
-    ship.move(line)
+    ship.process_line(line)
+    print(ship.get_position())
 
-ship.get_position()
 print(ship.get_manhattan_distance())
