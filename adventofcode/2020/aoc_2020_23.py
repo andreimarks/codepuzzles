@@ -74,28 +74,36 @@ Using your labeling, simulate 100 moves. What are the labels on the cups after c
 Your puzzle input is 871369452."""
 
 def play_round(input):
-    print(input)
+    # Adjust relevant values according to pick-up rule
     current = input[0]
     picked_up = input[1:4]
     input = input[4:] + input[:1]
-    print(input)
+
+    # Determine insertion point
     next = current - 1
     while not next in input:
-        next -= 1
-    insert_index = input(next)
-    input[insert_index:insert_index] = picked_up
-    print(input)
+        next = next - 1 if next - 1 > 0 else max(input)
+
+    # Insert
+    insert_index = input.index(next)
+    input[insert_index+1:insert_index+1] = picked_up
+
+    return input
 
 
-    print(current)
-    print(picked_up)
+def solve_part_one(input):
+    input = list(map(int, input))
+    for i in range(100):
+        #print(f"-- Move {i + 1} --")
+        input = play_round(input)
+
+    index = input.index(1)
+    final = input[index + 1:] + input[0:index]
+    print("".join(map(str, final)))
 
 
 test_input = "389125467"
+my_input = "871369452"
 
-input_to_use = test_input
-input_to_use = list(map(int, input_to_use))
-
-for i in range(1):
-    print(f"-- Move {i+1} --")
-    play_round(input_to_use)
+input_to_use = my_input
+solve_part_one(input_to_use) # 28793654
