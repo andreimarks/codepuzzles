@@ -1,3 +1,4 @@
+from helpers import get_list_from_file
 import re
 
 """--- Day 21: Allergen Assessment ---
@@ -22,30 +23,41 @@ The first step is to determine which ingredients can't possibly contain any of t
 Determine which ingredients cannot possibly contain any of the allergens in your list. How many times do any of those ingredients appear?"""
 
 class Food:
+
     def __init__(self, line):
         matches = re.match("(.*) \(contains (.*)\)", line)
         self.ingredients = set(matches.group(1).split(" "))
         self.allergens = set(matches.group(2).split(", "))
-        print(self.ingredients)
-        print(self.allergens)
+
+
+def solve_part_one(input):
+    # Construct food and allergen collections
+    foods = [Food(line) for line in input]
+    allergens = set()
+    ingredients = []
+    for food in foods:
+        allergens = allergens.union(food.allergens)
+        ingredients.extend(list(food.ingredients))
+
+    # Find all potential allergens
+    potential_allergens = {}
+    for allergen in allergens:
+        foods_with_allergen = [food for food in foods if allergen in food.allergens]
+        i_set = set.intersection(*[food.ingredients for food in foods_with_allergen])
+        potential_allergens[allergen] = i_set
+
+    # Solve
+    allergen_ingredients = set.union(*potential_allergens.values())
+    print(len([ingredient for ingredient in ingredients if not ingredient in allergen_ingredients]))
+
 
 test_input = """mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
 trh fvjkl sbzzf mxmxvkd (contains dairy)
 sqjhc fvjkl (contains soy)
 sqjhc mxmxvkd sbzzf (contains fish)""".split("\n")
 
-input_to_use = test_input
+#input_to_use = test_input
+input_to_use = get_list_from_file("aoc_2020_21_input")
 
-foods = [Food(line) for line in input_to_use]
-allergens = set()
-for food in foods:
-    allergens = allergens.union(food.allergens)
-
-for allergen in allergens:
-    print("Checking: " + allergen)
-    foods_with_allergen = [food for food in foods if allergen in food.allergens]
-    intersection = set()
-    intersection = intersection.intersection([food.ingredients for food in foods_with_allergen])
-    print(intersection)
-
+solve_part_one(input_to_use) # 2211
 
