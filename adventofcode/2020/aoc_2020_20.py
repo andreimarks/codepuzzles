@@ -162,6 +162,69 @@ To check that you've assembled the image correctly, multiply the IDs of the four
 
 Assemble the tiles into an image. What do you get if you multiply together the IDs of the four corner tiles?"""
 
+class Tile:
+
+    def __init__(self, input):
+        self.original_input = input
+        self.id = int(re.match("\D*(\d+).\D*", input).group(1))
+        #print(self.id)
+        lines = input.split("\n")[1:]
+        self.allowed_edges = self.get_allowed_edges(lines)
+        #print(self.allowed_edges)
+        pass
+
+    def get_allowed_edges(self, lines):
+        allowed_edges = []
+        # North
+        north = lines[0]
+        allowed_edges.append(north)
+        allowed_edges.append(north[::-1])
+
+        # South
+        south = lines[-1]
+        allowed_edges.append(south)
+        allowed_edges.append(south[::-1])
+
+        # East
+        east = "".join([line[-1] for line in lines])
+        allowed_edges.append(east)
+        allowed_edges.append(east[::-1])
+
+        # West
+        west = "".join([line[0] for line in lines])
+        allowed_edges.append(west)
+        allowed_edges.append(west[::-1])
+
+        return allowed_edges
+
+
+def create_tiles(input):
+    input = input.split("\n\n")
+    return [Tile(line) for line in input]
+
+
+def solve_part_one(input):
+    tiles = create_tiles(input_to_use)
+    matched_edges = {}
+    for tile in tiles:
+        # print("Checking: " + str(tile.id))
+        matched_edges[tile.id] = []
+        other_tiles = [other_tile for other_tile in tiles if not other_tile is tile]
+        for edge in tile.allowed_edges:
+            for other_tile in other_tiles:
+                matches = [other_edge for other_edge in other_tile.allowed_edges if other_edge == edge]
+                matched_edges[tile.id].extend(matches)
+
+    sorted_dict = dict(sorted(matched_edges.items(), key=lambda item: len(item[1])))
+
+    product = 1
+    ids = list(sorted_dict)
+    for i in range(4):
+        product *= ids[i]
+
+    print(product)
+
+
 test_input = """Tile 2311:
 ..##.#..#.
 ##..#.....
@@ -270,50 +333,7 @@ Tile 3079:
 ..#.......
 ..#.###..."""
 
-class Tile:
+#input_to_use = test_input
+input_to_use = open("aoc_2020_20_input").read()
 
-    def __init__(self, input):
-        self.original_input = input
-        self.id = re.match("\D*(\d+).\D*", input).group(1)
-        lines = input.split("\n")[1:]
-        self.allowed_edges = self.get_allowed_edges(lines)
-        print(self.allowed_edges)
-        pass
-
-    def get_allowed_edges(self, lines):
-        allowed_edges = []
-        # North
-        north = lines[0]
-        allowed_edges.append(north)
-        allowed_edges.append(north[::-1])
-
-        # South
-        south = lines[-1]
-        allowed_edges.append(south)
-        allowed_edges.append(south[::-1])
-
-        # East
-        east = "".join([line[-1] for line in lines])
-        allowed_edges.append(east)
-        allowed_edges.append(east[::-1])
-
-        # West
-        west = "".join([line[0] for line in lines])
-        allowed_edges.append(west)
-        allowed_edges.append(west[::-1])
-
-        return allowed_edges
-
-
-def create_tiles(input):
-    input = input.split("\n\n")
-    return [Tile(line) for line in input]
-
-
-input_to_use = test_input
-#input_to_use = open("aoc_2020_20_input").read()
-
-tiles = create_tiles(input_to_use)
-
-print(len(tiles))
-
+solve_part_one(input_to_use) # 5966506063747
