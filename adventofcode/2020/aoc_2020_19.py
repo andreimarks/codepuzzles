@@ -1,4 +1,6 @@
 import re
+import copy
+from pprint import pprint
 
 """--- Day 19: Monster Messages ---
 You land in an airport surrounded by dense forest. As you walk to your high-speed train, the Elves at the Mythical Information Bureau contact you again. They think their satellite has collected an image of a sea monster! Unfortunately, the connection to the satellite is having problems, and many of the messages sent back from the satellite have been corrupted.
@@ -51,31 +53,141 @@ Your goal is to determine the number of messages that completely match rule 0. I
 
 How many messages completely match rule 0?"""
 
-def process_rules(input):
+class Rule:
+
+    def __init__(self, id, line):
+        #print(str(id) + ": " + line)
+        self.id = id
+        self.line = " " + line + " "
+        self.substituted = self.line
+        self.rules = None
+        self.subrule_keys = None
+        self.subrules = None
+        self.value_swaps = None
+        self.value = None
+        self.possible_values = None
+
+    def set_subrule_keys(self, rules):
+        #print("set_subrule keys for: " + str(self.id))
+
+        sequences = self.line.split(" | ")
+
+        self.subrule_keys = []
+        for sequence in sequences:
+            sequence = sequence.replace("\"", "").split(" ")
+            if not (sequence[0] == "a" or sequence[0] == "b"):
+                sequence = list(map(int, sequence))
+                self.subrule_keys.append(sequence)
+            else:
+                self.subrule_keys = None
+
+        #print(self.subrule_keys)
+        return
+
+    def set_subrules(self, rules):
+        #print("set_subrules for: " + str(self.id))
+        options = []
+
+        if self.subrule_keys is None:
+            return
+
+        for option in self.subrule_keys:
+            keys = []
+            for key in option:
+                keys.append(rules[key])
+            options.append(keys)
+
+        self.subrules = options
+        #print(self.subrules)
+
+    def set_available_value_swaps(self, rules):
+        if self.subrules is None:
+            self.possible_values = re.match(".*(a|b).*", self.line).group(1)
+            return
+
+        if self.value_swaps is None:
+            self.value_swaps = copy.deepcopy(self.subrules)
+
+        print("set_available_rules_for: " + str(self.id))
+        for index, rule in enumerate(self.subrules):
+            print(len(rule))
+            ready_to_set_values = True
+            if len(rule) > 1:
+                for jndex, subrule in enumerate(rule):
+                    print(subrule)
+                    if rules[subrule.id].get_possible_values() is None:
+                        print("Waiting on " + str(rules[subrule.id].id))
+                        ready_to_set_values = False
+                        continue
+                    self.value_swaps[index][jndex] = subrule.get_possible_values()
+            else:
+                if rules[rule.id].get_possible_values() is None:
+                    print("Waiting on " + rule.line)
+                    ready_to_set_values = False
+                    continue
+                self.value_swaps[index] = rule.get_possible_values()
+
+        if (ready_to_set_values):
+            self.possible_values = [""]
+            for i, option in enumerate(self.value_swaps):
+                print(option)
+                if len(option) > 1:
+                    """
+                    for j, value in enumerate(option):
+                        self.possible_values[i]
+                        """
+                    pass
+                else:
+                    self.possible_values[i] += option
+
+        print(self.value_swaps)
+
+    def get_possible_values(self):
+        print("get_possible_values for: " + str(self.id))
+        return self.possible_values
+
+
+def process_rules_oop(input):
     rules = {}
     for line in input:
         match = re.match("(\d+): (.*)", line)
-        key = match.group(1)
-        values = match.group(2).replace("\"", "").split(" | ")
+        key = int(match.group(1))
+        value = match.group(2).replace("\"", "")
+        rules[key] = Rule(key, value)
 
-        if "a" in values or "b" in values:
-            rules[int(key)] = values
-            continue
-
-        rules[int(key)] = [list(map(int, value.split(" ")))
-                           for value in values]
-
-    #print(rules)
     return rules
 
+def set_subrule_keys(rules):
+    for rule in rules.values():
+        rule.set_subrule_keys(rules)
+
+def set_subrules(rules):
+    for rule in rules.values():
+        rule.set_subrules(rules)
+
+def set_value_swaps(rules):
+    for i in range(3):
+        print("Set value swaps: " + str(i) + "_---------------------------")
+        for rule in rules.values():
+            print(rule.subrules)
+            rule.set_available_value_swaps(rules)
 
 def substitute_rules(rules):
-    for key in sorted(rules.keys()):
-        substitute_rule(rules, key)
+    print(rules)
+    for value in rules.values():
+        substitute_rule_keys(rules, value)
     return rules
 
+def substitute_rule_keys(rules, value):
+    print("substitute keys in: " + str(value))
+    if isinstance(value, list):
+        string = str(value)
+        print(string)
+        lst = list(string)
+        print(lst)
+
+
 def substitute_rule(rules, key):
-    #print("substitute rule for: " + str(key))
 
     #print(rules[key])
     for i, option in enumerate(rules[key]):
@@ -94,25 +206,82 @@ def substitute_rule(rules, key):
 
 
 def generate_rule_options(rules):
-    rule_options = []
-    rule_zero = rules[0]
+    print(rules)
+    rule_zero = rules[0][0]
+    print(rule_zero)
+    rule_options = [""]
+    get_string_options(rules, rule_options, rule_zero, 0)
+    print(rule_options)
 
-    for rule in rule_zero[0]:
-        rule_options.append(generate_allowed_strings(rule))
+    return rule_options
 
-def generate_allowed_strings(rule):
-    allowed_strings = None
 
-    return allowed_strings
+def get_string_options(rules, rule_options, rule, current_index):
+    print(rule)
+
+    first_pass = True
+    for key in rule:
+        print(key)
+        if isinstance(key, list) and not isinstance(key[0], list):
+            for item in key:
+                print(item)
+                if not first_pass:
+                    rule_options.append(rule_options[current_index])
+                    current_index += 1
+                get_string_options(rules, rule_options, item, current_index)
+
+        # if we're at the letters, we just add it to the current string
+        value = rules[key]
+        if isinstance(value, str):
+            rule_options[current_index] += value
+        #if isinstance(value, list):
+
+        else:
+            #current_string += "_dosomething_"
+            print(value)
+            get_string_options(rules, rule_options, value, current_index)
+        #print(current_string)
+
 
 def evaluate_message(message, rules):
-    print("evaluating message: " + message)
+    print("Evaluating message: " + message)
     pointer = 0;
+
+    while pointer < len(message):
+        pass
+        #check_against_rules(rules, message, pointer)
 
     for rule in rules[0]:
         print(len(rule))
         for subrule in rule:
             print(subrule)
+
+def replace_strings(rules):
+    #print("replace keys -------------------------")
+    for rule in rules.keys():
+        if rules[rule].line == " a " or rules[rule].line == " b ":
+            #print(rule)
+            #print("Here")
+            search_for = " " + str(rule) + " "
+            #print(search_for)
+            replace_with = rules[rule].line
+            #print(replace_with)
+            for key, value in rules.items():
+                #print(str(key) + ": " + str(value.substituted))
+                rules[key].substituted = rules[key].substituted.replace(search_for, replace_with)
+                #print(str(key) + ": " + str(rules[key].substituted))
+
+    #print("replace others -------------------------")
+    for rule in sorted(rules.keys(), reverse=True):
+        search_for = " " + str(rule) + " "
+        replace_with = " ( " + rules[rule].substituted + " ) "
+        for key, value in rules.items():
+            #print(str(key) + ": " + str(value.substituted))
+            rules[key].substituted = rules[key].substituted.replace(search_for, replace_with)
+            #print(str(key) + ": " + str(value.substituted))
+
+    return rules
+
 
 test_input = """0: 4 1 5
 1: 2 3 | 3 2
@@ -129,13 +298,15 @@ aaaabbb""".split("\n\n")
 
 input_to_use = test_input
 #input_to_use = open("aoc_2020_19_input").read().split("\n\n")
+rules_input = input_to_use[0].split("\n")
+messages_input = input_to_use[1].split("\n")
 
-rules = process_rules(input_to_use[0].split("\n"))
-rules = substitute_rules(rules)
-rule_options = generate_rule_options(rules)
+rules = process_rules_oop(rules_input)
+print(rules)
+for i in range(2):
+    rules = replace_strings(rules)
+for rule in sorted(rules.keys(), reverse = True):
+    rules[rule].substituted = rules[rule].substituted.replace(" ", "").replace("(a)", "a").replace("(b)", "b").replace("(aa)", "aa").replace("(bb)", "bb").replace("(ab)", "ab").replace("(ba)", "ba")
+    #print(str(rules[rule].id) + ": " + rules[rule].substituted)
 
-messages = input_to_use[1].split("\n")
-
-for message in messages:
-        #evaluate_message(message, rules)
-    pass
+print(rules[0].substituted)
